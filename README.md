@@ -83,7 +83,9 @@ GPUSentry [OPTIONS]
 
 ## Demo
 
-<video src="./assets/demo.mp4" controls width="800"></video>
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/dd1c7051-aa7c-485d-ada2-67e7139c91e8" controls width="800"></video>
+</p>
 
 ## Todo List
 
