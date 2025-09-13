@@ -3,7 +3,7 @@
 version = 4
 
 [[package]]
-name = "GPU-monitor"
+name = "GPUSentry"
 version = "0.1.0"
 dependencies = [
  "clap",

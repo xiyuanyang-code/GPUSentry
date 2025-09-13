@@ -1,5 +1,5 @@
 [package]
-name = "GPU-monitor"
+name = "GPUSentry"
 version = "0.1.0"
 edition = "2024"
 
