@@ -2,7 +2,29 @@
 import sys
 import argparse
 import time
+import platform
 from . import board, backend
+
+def is_apple_system():
+    return platform.system() == 'Darwin'
+
+def has_cuda_driver():
+    try:
+        from pynvml import nvmlInit, nvmlDeviceGetCount, nvmlShutdown
+        nvmlInit()
+        count = nvmlDeviceGetCount()
+        nvmlShutdown()
+        return count > 0
+    except Exception:
+        return False
+
+def basic_check():
+    if is_apple_system():
+        print("Sorry, but this tool is designed for Linux Servers or Windows (Supporting Cuda)")
+        exit(0)
+    if not has_cuda_driver():
+        print("Please install Cuda driver first!")
+        exit(0)
 
 def main():
     '''Main entry point for the GPUSentry CLI application.'''
