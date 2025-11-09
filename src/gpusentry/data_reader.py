@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 from .database import DatabaseManager, GPUStat
-from .logger import app_logger
+from .utils.logger import app_logger
 
 class DataReader:
     """Class for reading and analyzing GPU statistics data."""

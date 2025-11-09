@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from typing import Optional, Generator
 from dataclasses import dataclass
 from datetime import datetime
-from .logger import app_logger
+from .utils.logger import app_logger
 
 
 @dataclass

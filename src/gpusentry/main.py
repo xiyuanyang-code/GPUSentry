@@ -4,6 +4,7 @@ import argparse
 import time
 import platform
 from . import board, backend
+from .utils.configs import Config
 
 def is_apple_system():
     return platform.system() == 'Darwin'
@@ -36,13 +37,25 @@ def main():
 
     # Board command - for monitoring dashboard (default command)
     board_parser = subparsers.add_parser('board', help='Show GPU monitoring dashboard')
+    board_parser.add_argument(
+        '--config',
+        type=str,
+        default='./config.yaml',
+        help='Path to the configuration file (default: ./config.yaml)'
+    )
+    
     # Backend command - for background monitoring
     backend_parser = subparsers.add_parser('backend', help='Start backend monitoring service')
     backend_parser.add_argument(
+        '--config',
+        type=str,
+        default='./config.yaml',
+        help='Path to the configuration file (default: ./config.yaml)'
+    )
+    backend_parser.add_argument(
         '--interval',
         type=int,
-        default=5,
-        help='Data collection interval in seconds (default: 5)'
+        help='Data collection interval in seconds (overrides config value)'
     )
 
     # If no command is specified, default to 'board'
@@ -51,10 +64,15 @@ def main():
 
     args = parser.parse_args()
 
+    # Load configuration
+    config = Config(config_file_path=args.config)
+
     if args.command == 'board':
         board.show_dashboard()
     elif args.command == 'backend':
-        backend_service = backend.BackendMonitor(args.interval)
+        # Use command-line interval if provided, otherwise use config value
+        interval = args.interval if args.interval is not None else config.monitoring_interval
+        backend_service = backend.BackendMonitor(interval=interval, config=config)
         try:
             backend_service.start()
             # Keep the main thread alive

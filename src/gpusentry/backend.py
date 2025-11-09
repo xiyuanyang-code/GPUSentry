@@ -1,4 +1,4 @@
-"""Module for backend monitoring services."""
+'''Module for backend monitoring services.'''
 import time
 import subprocess
 import threading
@@ -7,39 +7,44 @@ import logging
 from typing import Optional
 from datetime import datetime
 from .database import DatabaseManager, GPUStat
-from .logger import app_logger
+from .utils.logger import app_logger
+from .utils.configs import Config
+
 
 class BackendMonitor:
-    """Backend service for continuous GPU monitoring and data collection."""
+    '''Backend service for continuous GPU monitoring and data collection.'''
     
-    def __init__(self, interval: int = 5):
-        """Initialize backend monitor.
+    def __init__(self, interval: int = 5, config: Optional[Config] = None):
+        '''Initialize backend monitor.
         
         Args:
             interval: Data collection interval in seconds (default: 5)
-        """
-        self.interval = interval
+            config: Configuration object (optional, will use defaults if not provided)
+        '''
+        self.config = config or Config()
+        # Use config value if interval is not provided or use the provided interval
+        self.interval = interval if interval != 5 or config is None else self.config.monitoring_interval
         self.running = False
         self.monitor_thread: Optional[threading.Thread] = None
-        self.db_manager = DatabaseManager()
+        self.db_manager = DatabaseManager(db_path=self.config.database_path)
         self.logger = app_logger
 
     def start(self):
-        """Start the backend monitoring service."""
+        '''Start the backend monitoring service.'''
         self.running = True
         self.monitor_thread = threading.Thread(target=self._monitor_loop)
         self.monitor_thread.start()
-        self.logger.info("Backend monitoring service started...")
+        self.logger.info('Backend monitoring service started...')
 
     def stop(self):
-        """Stop the backend monitoring service."""
+        '''Stop the backend monitoring service.'''
         self.running = False
         if self.monitor_thread:
             self.monitor_thread.join()
-        self.logger.info("Backend monitoring service stopped.")
+        self.logger.info('Backend monitoring service stopped.')
 
     def _monitor_loop(self):
-        """Main monitoring loop."""
+        '''Main monitoring loop.'''
         while self.running:
             try:
                 # Collect GPU stats using gpustat
@@ -64,31 +69,32 @@ class BackendMonitor:
                     )
                     self.db_manager.insert_gpu_stat(stat)
                 
-                self.logger.info(f"Collected GPU data for {len(gpu_data['gpus'])} GPUs")
-                self.logger.debug(f"{json.dumps(gpu_data,indent=2,ensure_ascii=False)}")
+                self.logger.info(f'Collected GPU data for {len(gpu_data['gpus'])} GPUs')
+                self.logger.debug(f'{json.dumps(gpu_data,indent=2,ensure_ascii=False)}')
                 time.sleep(self.interval)
             except subprocess.CalledProcessError as e:
-                self.logger.error(f"Error collecting GPU stats: {e}")
+                self.logger.error(f'Error collecting GPU stats: {e}')
                 time.sleep(self.interval)
             except json.JSONDecodeError as e:
-                self.logger.error(f"Error parsing GPU stats JSON: {e}")
+                self.logger.error(f'Error parsing GPU stats JSON: {e}')
                 time.sleep(self.interval)
             except Exception as e:
-                self.logger.error(f"Unexpected error in monitoring loop: {e}")
+                self.logger.error(f'Unexpected error in monitoring loop: {e}')
                 time.sleep(self.interval)
             except KeyboardInterrupt:
                 break
 
 
 def run_backend():
-    """Run the backend monitoring service."""
-    monitor = BackendMonitor()
+    '''Run the backend monitoring service.'''
+    config = Config()
+    monitor = BackendMonitor(config=config)
     try:
         monitor.start()
         # Keep the main thread alive
         while monitor.running:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\nReceived interrupt signal, stopping backend service...")
+        print('\nReceived interrupt signal, stopping backend service...')
         monitor.stop()
 

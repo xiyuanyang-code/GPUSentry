@@ -212,4 +212,6 @@ pyrightconfig.json
 
 
 **/*.db
+**/*.log
 uv.lock
+config.yaml

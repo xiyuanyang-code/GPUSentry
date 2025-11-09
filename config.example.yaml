@@ -10,13 +10,6 @@ monitoring:
   interval: 5  # Monitoring interval (seconds)
   enable_logging: true  # Whether to enable logging
 
-# Alert Settings
-alerting:
-  enable_alerts: true  # Whether to enable alerts
-  gpu_memory_threshold: 0.9  # GPU memory usage threshold (90%)
-  gpu_utilization_threshold: 0.95  # GPU utilization threshold (95%)
-  temperature_threshold: 80  # GPU temperature threshold (Celsius)
-
 # Logging Settings
 logging:
   database_path: "gpusentry.db"  # Database path
@@ -24,6 +17,9 @@ logging:
 
 # Reporting Settings
 reporting:
-  daily_time: "23:59"  # Daily report time
+  daily_time: "23:00"  # Daily report time
   weekly_day: 0  # Weekly report day (0=Sunday, 1=Monday, ...)
   monthly_day: 1  # Monthly report day (1-31)
+
+# alert settings
+# todo to be done in the future
