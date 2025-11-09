@@ -1,0 +1,189 @@
+"""Database models and connection management for GPUSentry."""
+
+import os
+import sqlite3
+import logging
+from contextlib import contextmanager
+from typing import Optional, Generator
+from dataclasses import dataclass
+from datetime import datetime
+from .logger import app_logger
+
+
+@dataclass
+class GPUStat:
+    """Data class representing GPU statistics."""
+    timestamp: datetime
+    gpu_id: int
+    name: str
+    temperature: float
+    utilization: float
+    memory_used: int
+    memory_total: int
+    power_draw: float
+    power_limit: float
+    processes: str  # JSON string of running processes
+
+
+class DatabaseManager:
+    """Manages database connections and operations for GPU statistics."""
+    
+    def __init__(self, db_path: Optional[str] = None):
+        """Initialize database manager.
+        
+        Args:
+            db_path: Path to SQLite database file. Defaults to ~/.gpusentry/gpu_stats.db
+        """
+        if db_path is None:
+            home_dir = os.path.expanduser("~")
+            gpusentry_dir = os.path.join(home_dir, ".gpusentry")
+            os.makedirs(gpusentry_dir, exist_ok=True)
+            db_path = os.path.join(gpusentry_dir, "gpu_stats.db")
+        
+        self.db_path = db_path
+        self.logger = app_logger
+        self._initialize_database()
+    
+    def _initialize_database(self):
+        """Create database tables if they don't exist."""
+        with self._get_connection() as conn:
+            self.logger.info(f"Initializing database at {self.db_path}")
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS gpu_stats (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp DATETIME NOT NULL,
+                    gpu_id INTEGER NOT NULL,
+                    name TEXT NOT NULL,
+                    temperature REAL,
+                    utilization REAL,
+                    memory_used INTEGER,
+                    memory_total INTEGER,
+                    power_draw REAL,
+                    power_limit REAL,
+                    processes TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Create indexes for better query performance
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_gpu_stats_timestamp 
+                ON gpu_stats (timestamp)
+            """)
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_gpu_stats_gpu_id 
+                ON gpu_stats (gpu_id)
+            """)
+            self.logger.info("Database tables and indexes created successfully")
+    
+    @contextmanager
+    def _get_connection(self) -> Generator[sqlite3.Connection, None, None]:
+        """Context manager for database connections."""
+        conn = sqlite3.connect(self.db_path)
+        try:
+            yield conn
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+    
+    def insert_gpu_stat(self, stat: GPUStat) -> None:
+        """Insert a GPU statistics record into the database.
+        
+        Args:
+            stat: GPUStat object containing the statistics to insert
+        """
+        with self._get_connection() as conn:
+            self.logger.debug(f"Inserting GPU stat for GPU {stat.gpu_id} at {stat.timestamp}")
+            conn.execute("""
+                INSERT INTO gpu_stats (
+                    timestamp, gpu_id, name, temperature, utilization,
+                    memory_used, memory_total, power_draw, power_limit, processes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                stat.timestamp, stat.gpu_id, stat.name, stat.temperature,
+                stat.utilization, stat.memory_used, stat.memory_total,
+                stat.power_draw, stat.power_limit, stat.processes
+            ))
+            self.logger.debug(f"Successfully inserted GPU stat for GPU {stat.gpu_id}")
+    
+    def get_latest_stats(self, limit: int = 10) -> list[GPUStat]:
+        """Retrieve the latest GPU statistics records.
+        
+        Args:
+            limit: Maximum number of records to retrieve
+            
+        Returns:
+            List of GPUStat objects
+        """
+        self.logger.debug(f"Retrieving latest {limit} GPU statistics records")
+        with self._get_connection() as conn:
+            cursor = conn.execute("""
+                SELECT timestamp, gpu_id, name, temperature, utilization,
+                       memory_used, memory_total, power_draw, power_limit, processes
+                FROM gpu_stats
+                ORDER BY timestamp DESC
+                LIMIT ?
+            """, (limit,))
+            
+            rows = cursor.fetchall()
+            stats = []
+            for row in rows:
+                stat = GPUStat(
+                    timestamp=datetime.fromisoformat(row[0]),
+                    gpu_id=row[1],
+                    name=row[2],
+                    temperature=row[3],
+                    utilization=row[4],
+                    memory_used=row[5],
+                    memory_total=row[6],
+                    power_draw=row[7],
+                    power_limit=row[8],
+                    processes=row[9]
+                )
+                stats.append(stat)
+            
+            self.logger.debug(f"Retrieved {len(stats)} GPU statistics records")
+            return stats
+    
+    def get_stats_by_time_range(self, start_time: datetime, end_time: datetime) -> list[GPUStat]:
+        """Retrieve GPU statistics within a specific time range.
+        
+        Args:
+            start_time: Start of time range
+            end_time: End of time range
+            
+        Returns:
+            List of GPUStat objects
+        """
+        self.logger.debug(f"Retrieving GPU statistics from {start_time} to {end_time}")
+        with self._get_connection() as conn:
+            cursor = conn.execute("""
+                SELECT timestamp, gpu_id, name, temperature, utilization,
+                       memory_used, memory_total, power_draw, power_limit, processes
+                FROM gpu_stats
+                WHERE timestamp BETWEEN ? AND ?
+                ORDER BY timestamp ASC
+            """, (start_time.isoformat(), end_time.isoformat()))
+            
+            rows = cursor.fetchall()
+            stats = []
+            for row in rows:
+                stat = GPUStat(
+                    timestamp=datetime.fromisoformat(row[0]),
+                    gpu_id=row[1],
+                    name=row[2],
+                    temperature=row[3],
+                    utilization=row[4],
+                    memory_used=row[5],
+                    memory_total=row[6],
+                    power_draw=row[7],
+                    power_limit=row[8],
+                    processes=row[9]
+                )
+                stats.append(stat)
+            
+            self.logger.debug(f"Retrieved {len(stats)} GPU statistics records for time range")
+            return stats
