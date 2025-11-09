@@ -10,11 +10,6 @@ monitoring:
   interval: 5  # Monitoring interval (seconds)
   enable_logging: true  # Whether to enable logging
 
-# Logging Settings
-logging:
-  database_path: "gpusentry.db"  # Database path
-  retention_days: 30  # Log retention days
-
 # Reporting Settings
 reporting:
   daily_time: "23:00"  # Daily report time

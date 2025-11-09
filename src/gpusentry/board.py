@@ -3,9 +3,9 @@
 import subprocess
 import sys
 import time
+import os
 from datetime import datetime
 from colorama import init, Fore, Style
-import os
 
 init(autoreset=True)
 

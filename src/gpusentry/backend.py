@@ -3,7 +3,6 @@ import time
 import subprocess
 import threading
 import json
-import logging
 from typing import Optional
 from datetime import datetime
 from .database import DatabaseManager, GPUStat

@@ -12,7 +12,7 @@ logger = app_logger
 def initialize_feishu_config(config: Config):
     """
     Initialize the Feishu configuration.
-    
+
     Args:
         config: Configuration object
     """
@@ -20,7 +20,7 @@ def initialize_feishu_config(config: Config):
     _config = config
 
 
-def send_feishu_message(message: str) -> bool:
+def send_feishu_message(message: str, auto_init: bool = True) -> bool:
     """
     Sends a text message directly to the Feishu bot's Webhook.
 
@@ -32,18 +32,23 @@ def send_feishu_message(message: str) -> bool:
     """
     # Check if config is initialized
     if _config is None:
-        logger.error("Feishu configuration not initialized")
-        return False
-    
+        if not auto_init:
+            logger.error("Feishu configuration not initialized")
+            return False
+        else:
+            logger.warning("Feishu auto initing...")
+            config = Config()
+            initialize_feishu_config(config=config)
+
     # Get configuration values
     keyword = _config.feishu_keyword
     webhook_url = _config.feishu_webhook_url
-    
+
     # Check if webhook URL is configured
     if not webhook_url:
         logger.warning("Feishu webhook URL not configured")
         return False
-    
+
     if keyword not in message:
         message = f"【{keyword}】{message}"
 
@@ -52,9 +57,7 @@ def send_feishu_message(message: str) -> bool:
 
     logger.info(f"Sending message to Feishu: '{message}'")
     try:
-        response = requests.post(
-            webhook_url, json=payload, headers=headers, timeout=10
-        )
+        response = requests.post(webhook_url, json=payload, headers=headers, timeout=10)
         response.raise_for_status()
 
         response_data = response.json()
@@ -68,7 +71,8 @@ def send_feishu_message(message: str) -> bool:
     except requests.exceptions.RequestException as e:
         logger.error(f"An error occurred while sending request to Feishu: {e}")
         return False
-    
+
+
 if __name__ == "__main__":
     config = Config()
     initialize_feishu_config(config=config)

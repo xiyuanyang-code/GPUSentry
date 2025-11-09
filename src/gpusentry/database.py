@@ -2,7 +2,6 @@
 
 import os
 import sqlite3
-import logging
 from contextlib import contextmanager
 from typing import Optional, Generator
 from dataclasses import dataclass
