@@ -8,6 +8,8 @@ This version for GPUSentry contains more powerful features:
 - Auto Scripting
 - Analyzing Logger for daily & monthly
 - Automatic Monitoring and Alerting
+- Scheduled Reporting
+- Feishu Webhook Integration
 
 
 ## Introduction
@@ -25,6 +27,11 @@ We want it to be simple, and **fast** enough as a **loyal sentry**!
 - Configurable monitoring intervals
 - Logging system with file and console output
 - Data retrieval and analysis capabilities
+- Scheduled reporting (daily/weekly/monthly)
+- Feishu Webhook integration with text and chart support
+- Custom time range reports (minute-level granularity)
+- LLM-powered intelligent analysis
+- Database reset and statistics functionality
 
 ## Usage
 
@@ -80,9 +87,12 @@ LLM:
 - `gpusentry` or `gpusentry board`: Launch GPU monitoring dashboard
 - `gpusentry backend`: Start background monitoring service
 - `gpusentry backend --interval 10`: Start with custom collection interval (in seconds)
-- `gpusentry reset`: reset database
-- `gpusentry send $1`: for debugging, sending last `$1` minutes to Feishu Webhook
+- `gpusentry reset`: Reset database and generate statistics
+- `gpusentry reset --force`: Force reset database without confirmation
+- `gpusentry send N`: Send report for the last N minutes to Feishu Webhook
 
 ## LLM Usage
 
 All the code in this project is written by LLM, with specifications given clearly in [spec](./spec/README.md).
+
+The project integrates OpenAI API for intelligent analysis of GPU usage patterns. To enable this feature, configure your API key in the `config.yaml` file or set it as an environment variable.

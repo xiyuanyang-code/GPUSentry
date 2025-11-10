@@ -8,6 +8,8 @@
 - 自动脚本执行
 - 日常和月度日志分析
 - 自动监控和告警
+- 定时报告功能
+- 飞书Webhook集成
 
 
 ## 简介
@@ -25,6 +27,11 @@ GPUSentry是一个用于实时监控GPU状态的命令行工具。它通过利�
 - 可配置的监控间隔
 - 支持文件和控制台输出的日志系统
 - 数据检索和分析功能
+- 定时报告（日/周/月）
+- 飞书Webhook集成，支持文本和图表消息
+- 自定义时间范围报告（支持分钟级）
+- LLM智能分析
+- 数据库重置与统计功能
 
 ## 使用方法
 
@@ -43,11 +50,41 @@ uv pip install -e .
 pip install -e .
 ```
 
+### 配置文件写入
+
+```yaml
+# GPUSentry Configuration File
+
+# Feishu Webhook Configuration
+feishu:
+  keyword: "GPUSentry"
+  webhook_url: "https://open.feishu.cn/open-apis/bot/v2/hook/your-hook"
+
+# Monitoring Settings
+monitoring:
+  interval: 5  # Monitoring interval (seconds)
+  enable_logging: true  # Whether to enable logging
+
+LLM:
+  model_name: deepseek-chat
+  OPENAI_API_KEY: sk-your-api-key
+  BASE_URL: https://api.deepseek.com
+
+# Reporting Settings
+# todo to be done in the future
+
+# alert settings
+# todo to be done in the future
+```
+
 ### 基本命令
 
 - `gpusentry` 或 `gpusentry board`：启动GPU监控仪表板
 - `gpusentry backend`：启动后台监控服务
 - `gpusentry backend --interval 10`：以自定义收集间隔启动（以秒为单位）
+- `gpusentry reset`：重置数据库并生成统计信息
+- `gpusentry reset --force`：强制重置数据库（无需确认）
+- `gpusentry send N`：发送过去N分钟的使用报告到飞书Webhook
 
 ## LLM使用说明
 
