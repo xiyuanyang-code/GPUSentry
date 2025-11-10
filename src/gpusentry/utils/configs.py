@@ -97,7 +97,7 @@ class Config:
     @property
     def database_path(self) -> str:
         """Get database path."""
-        return self.get("logging.database_path", "gpusentry.db")
+        return os.path.join(os.path.expanduser("~"), ".gpusentry", "gpu_stats.db")
     
     @property
     def retention_days(self) -> int:
@@ -117,4 +117,14 @@ class Config:
     @property
     def monthly_day(self) -> int:
         """Get monthly report day."""
-        return self.get("reporting.monthly_day", 1)
+        return self.get("reporting.monthly_day", -1)
+    
+    @property
+    def openai_api_key(self) -> str:
+        """Get OpenAI API key."""
+        return self.get("openai.api_key", "")
+    
+    @property
+    def openai_base_url(self) -> str:
+        """Get OpenAI base URL."""
+        return self.get("openai.base_url", "https://api.openai.com/v1")

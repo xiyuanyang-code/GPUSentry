@@ -3,18 +3,20 @@
 # Feishu Webhook Configuration
 feishu:
   keyword: "GPUSentry"
-  webhook_url: "https://open.feishu.cn/open-apis/bot/v2/hook/your-webhook-url"
+  webhook_url: "https://open.feishu.cn/open-apis/bot/v2/hook/your-hook"
 
 # Monitoring Settings
 monitoring:
   interval: 5  # Monitoring interval (seconds)
   enable_logging: true  # Whether to enable logging
 
+LLM:
+  model_name: deepseek-chat
+  OPENAI_API_KEY: sk-your-api-key
+  BASE_URL: https://api.deepseek.com
+
 # Reporting Settings
-reporting:
-  daily_time: "23:00"  # Daily report time
-  weekly_day: 0  # Weekly report day (0=Sunday, 1=Monday, ...)
-  monthly_day: 1  # Monthly report day (1-31)
+# todo to be done in the future
 
 # alert settings
 # todo to be done in the future

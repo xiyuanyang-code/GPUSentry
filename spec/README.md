@@ -61,10 +61,14 @@
 - 接入现有的 feishu-webhook 功能
 
 ### Task3 完成定时汇报功能
-
+- 设计新的接口 `gpusentry reset` 清空数据库
+  - 在清空设计库之前先读取一共有多少数据，生成简单的统计
 - 完成分析操作
   - 读取数据，生成 rule-based 的文字总结 和 图表总结
   - 调用 LLM，生成智能化的文字总结
+    - 使用 OpenAI 的 SDK 标准库实现
+      - 将会在 yaml 配置文件中提供 OPENAI_API_KEY 和 BASE_URL
+      - 如果没有，就 loadenv 并且在环境变量中读取
 - 串成完整 pipeline，实现**读取数据——分析成图表和文字总结——定时发送消息**的全流程 pipeline。
 
 ### Task4 完成自动预警功能
