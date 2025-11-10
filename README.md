@@ -43,11 +43,45 @@ uv pip install -e .
 pip install -e .
 ```
 
+### Configurations
+
+Copy [`config.example.yaml`](./config.example.yaml) into `config.yaml`.
+
+```yaml
+# GPUSentry Configuration File
+
+# Feishu Webhook Configuration
+feishu:
+  keyword: "GPUSentry"
+  webhook_url: "https://open.feishu.cn/open-apis/bot/v2/hook/your-hook"
+
+# Monitoring Settings
+monitoring:
+  interval: 5  # Monitoring interval (seconds)
+  enable_logging: true  # Whether to enable logging
+
+LLM:
+  model_name: deepseek-chat
+  OPENAI_API_KEY: sk-your-api-key
+  BASE_URL: https://api.deepseek.com
+
+# Reporting Settings
+# todo to be done in the future
+
+# alert settings
+# todo to be done in the future
+```
+
+- For message sending of alert and notifications, you are required to create a Feishu Bot and get the webhook-url.
+- Configure your LLM api-key for OpenAI SDK format.
+
 ### Basic Commands
 
 - `gpusentry` or `gpusentry board`: Launch GPU monitoring dashboard
 - `gpusentry backend`: Start background monitoring service
 - `gpusentry backend --interval 10`: Start with custom collection interval (in seconds)
+- `gpusentry reset`: reset database
+- `gpusentry send $1`: for debugging, sending last `$1` minutes to Feishu Webhook
 
 ## LLM Usage
 
